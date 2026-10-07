@@ -9,7 +9,7 @@ because you are fired." -Cave Johnson, 1950s
 
 ## Copyright (can I even copyright this?)
 This "library" is licensed under the BSD-3-Clause license. See
-[LICENSE.md][LICENSE.md] for more information.
+[LICENSE.md](LICENSE.md) for more information.
 
 ## API reference
 
