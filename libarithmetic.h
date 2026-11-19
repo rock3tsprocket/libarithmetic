@@ -31,6 +31,8 @@
 #ifndef LIB_ARITHMETIC
 #define LIB_ARITHMETIC
 
+const unsigned int LIBARITHMETIC_VER[3] = {1, 1, 0};
+
 #include <stdint.h>
 
 int64_t add(uint64_t x, uint64_t y) {
@@ -42,7 +44,7 @@ int64_t add(uint64_t x, uint64_t y) {
     int64_t result = 0;
     int64_t carry = 0;
 
-    /* This is very long so I'd recommend you skip to line 371 for the real
+    /* This is very long so I'd recommend you skip to line 373 for the real
      * action */
     result |= (int64_t)((x & 1L<<0)>>0 ^ (y & 1L<<0)>>0 ^ carry)<<0;
     if ((x & 1L<<0)>>0 && (y & 1L<<0)>>0 || (carry && (x & 1L<<0)>>0 ^ (y & 1L<<0)>>0))
@@ -384,20 +386,28 @@ uint8_t eq(int64_t x, int64_t y) {
 }
 
 int64_t mul(int64_t x, int64_t y) {
-    if (!x || !y)
-        return 0;
-    if (eq(x, 1))
-        return y;
-    if (eq(y, 1))
-        return x;
+    if (!x || !y) return 0;
+    if (eq(x, 1)) return y;
+    if (eq(y, 1)) return x;
 
-    int64_t orig_x = x;
-    while (!eq(y, 1))
-        x = add(x, orig_x), y = sub(y, 1);
-    return x;
+    if (y < 0) {
+        x = 1 / x;
+        y -= y*2;
+    }
+    int64_t temp = 0;
+    while (y > 1) {
+        if (y & 1) {
+            temp += x;
+            y--;
+        }
+        x += x;
+        y >>= 1;
+    }
+    return x+temp;
 }
 
 uint8_t bitlen(uint64_t x) {
+    if (!x) return 0;
     uint8_t i = 63;
     while (!eq((x & (1 << i))>>i, 1))
         i = sub(i, 1);
@@ -405,8 +415,10 @@ uint8_t bitlen(uint64_t x) {
 }
 
 uint64_t div(uint64_t x, uint64_t y) {
-    if (eq(y, 0))
+    if (!x)
         return 0;
+    if (!y)
+        return UINT64_MAX;
     if (eq(y, 1))
         return x;
     
@@ -425,7 +437,7 @@ uint64_t div(uint64_t x, uint64_t y) {
 
 uint64_t mod(uint64_t x, uint64_t y) {
     if (!y)
-        return 0xFFFFFFFFFFFFFFFF;
+        return UINT64_MAX;
     if (eq(y, 1) || eq(x, y) || !x)
         return 0;
 
