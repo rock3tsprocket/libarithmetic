@@ -31,7 +31,7 @@
 #ifndef LIB_ARITHMETIC
 #define LIB_ARITHMETIC
 
-const unsigned int LIBARITHMETIC_VER[3] = {1, 1, 0};
+const unsigned int LIBARITHMETIC_VER[3] = {1, 1, 1};
 
 #include <stdint.h>
 
@@ -391,19 +391,19 @@ int64_t mul(int64_t x, int64_t y) {
     if (eq(y, 1)) return x;
 
     if (y < 0) {
-        x = 1 / x;
-        y -= y*2;
+        x = add(~x, 1);
+        y = add(~y, 1);
     }
     int64_t temp = 0;
     while (y > 1) {
         if (y & 1) {
-            temp += x;
-            y--;
+            temp = add(temp, x);
+            y = sub(y, 1);
         }
-        x += x;
+        x <<= 1;
         y >>= 1;
     }
-    return x+temp;
+    return add(x, temp);
 }
 
 uint8_t bitlen(uint64_t x) {
@@ -429,7 +429,7 @@ uint64_t div(uint64_t x, uint64_t y) {
         r <<= 1;
         r |= (x & 1<<i)>>i;
         if (r >= y)
-            r -= y, q |= 1<<i;
+            r = sub(r, y), q |= 1<<i;
         i = sub(i, 1);
     }
     return q;
